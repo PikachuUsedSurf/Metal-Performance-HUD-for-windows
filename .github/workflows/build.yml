@@ -67,6 +67,8 @@ jobs:
           else
             tag="$GITHUB_REF_NAME"
           fi
+          # If this version was released before, replace it.
+          gh release delete "$tag" --yes --cleanup-tag || true
           gh release create "$tag" ios-hud-helper-windows.zip \
             --target "$GITHUB_SHA" \
             --title "iOS HUD Helper $tag" \
