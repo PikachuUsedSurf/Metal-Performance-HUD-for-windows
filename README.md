@@ -13,6 +13,12 @@ It does three things, one button each:
 3. **Launch a game with the HUD.** Starts a game with `MTL_HUD_ENABLED=1`, which asks
    Apple's Metal graphics framework to draw the HUD. Some games only show the HUD this way.
 
+## Download
+
+Get the latest **ios-hud-helper-windows.zip** from the
+[Releases page](https://github.com/PikachuUsedSurf/Metal-Performance-HUD-for-windows/releases/latest).
+Unzip it and run `ios-hud-helper.exe`.
+
 ## Before you start
 
 - **Install iTunes or the "Apple Devices" app** from Apple. They include the USB drivers
@@ -69,6 +75,16 @@ cargo test
 ```bash
 cargo test -- --ignored
 ```
+
+## Automatic builds and releases
+
+GitHub builds the app automatically (see `.github/workflows/build.yml`):
+
+- **Every change pushed to `main`** is tested and built. Open the **Actions** tab, click the
+  latest run, and download the app under **Artifacts**.
+- **To publish a new release**, open the **Actions** tab → **Build** → **Run workflow**, type a
+  version such as `0.2.0`, and click the green button. After a few minutes the zip appears on
+  the Releases page. Bump `version` in `Cargo.toml` to match.
 
 ## How the code is organized
 
