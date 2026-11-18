@@ -15,9 +15,12 @@ It does three things, one button each:
 
 ## Download
 
-Get the latest **ios-hud-helper-windows.zip** from the
-[Releases page](https://github.com/PikachuUsedSurf/Metal-Performance-HUD-for-windows/releases/latest).
-Unzip it and run `ios-hud-helper.exe`.
+**[Download ios-hud-helper.exe](https://github.com/PikachuUsedSurf/Metal-Performance-HUD-for-windows/releases/latest/download/ios-hud-helper.exe)**
+(always the newest version), or pick a version on the
+[Releases page](https://github.com/PikachuUsedSurf/Metal-Performance-HUD-for-windows/releases).
+
+It's a single file with nothing to install or unzip: just run it. Your browser may say the file
+"isn't commonly downloaded". Choose **Keep** to download it anyway.
 
 ## Before you start
 
@@ -81,10 +84,10 @@ cargo test -- --ignored
 GitHub builds the app automatically (see `.github/workflows/build.yml`):
 
 - **Every change pushed to `main`** is tested and built. Open the **Actions** tab, click the
-  latest run, and download the app under **Artifacts**.
+  latest run, and download `ios-hud-helper.exe` under **Artifacts** (you must be signed in to GitHub).
 - **To publish a new release**, open the **Actions** tab → **Build** → **Run workflow**, type a
-  version such as `0.2.0`, and click the green button. After a few minutes the zip appears on
-  the Releases page. Bump `version` in `Cargo.toml` to match.
+  version such as `0.2.0`, and click the green button. After a few minutes `ios-hud-helper.exe`
+  appears on the Releases page. Bump `version` in `Cargo.toml` to match.
 
 ## How the code is organized
 

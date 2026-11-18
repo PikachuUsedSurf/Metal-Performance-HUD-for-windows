@@ -1,9 +1,9 @@
 # Builds the Windows app on GitHub's servers.
 #
 # - Every push to main (and every pull request): runs the tests and builds the .exe.
-#   The result can be downloaded from that run's page in the Actions tab, under "Artifacts".
+#   The .exe can be downloaded from that run's page in the Actions tab, under "Artifacts".
 # - To publish a release: Actions tab → "Build" → "Run workflow" → type a version like 0.2.0.
-#   (Pushing a tag such as v0.2.0 does the same.) The zip then appears on the Releases page.
+#   (Pushing a tag such as v0.2.0 does the same.) The .exe then appears on the Releases page.
 
 name: Build
 
@@ -48,13 +48,14 @@ jobs:
       - name: Package
         run: |
           mkdir -p dist
-          cp target/x86_64-pc-windows-gnu/release/ios-hud-helper.exe README.md dist/
-          (cd dist && zip -9 ../ios-hud-helper-windows.zip ios-hud-helper.exe README.md)
+          cp target/x86_64-pc-windows-gnu/release/ios-hud-helper.exe dist/
 
+      # Upload the .exe on its own. "archive: false" stops GitHub from wrapping it in a zip,
+      # so the download is the app itself, named ios-hud-helper.exe.
       - uses: actions/upload-artifact@v7
         with:
-          name: ios-hud-helper-windows
-          path: dist/
+          path: dist/ios-hud-helper.exe
+          archive: false
 
       - name: Publish a release
         if: startsWith(github.ref, 'refs/tags/v') || inputs.version != ''
@@ -69,7 +70,7 @@ jobs:
           fi
           # If this version was released before, replace it.
           gh release delete "$tag" --yes --cleanup-tag || true
-          gh release create "$tag" ios-hud-helper-windows.zip \
+          gh release create "$tag" dist/ios-hud-helper.exe \
             --target "$GITHUB_SHA" \
             --title "iOS HUD Helper $tag" \
-            --notes "Download **ios-hud-helper-windows.zip**, unzip it and run \`ios-hud-helper.exe\`. You need iTunes or the Apple Devices app installed. See the README for the steps."
+            --notes "Download **ios-hud-helper.exe** and run it. Nothing to install or unzip. You need iTunes or the Apple Devices app installed. See the README for the steps."
