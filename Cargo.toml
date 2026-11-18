@@ -1,0 +1,45 @@
+[package]
+name = "ios-hud-helper"
+version = "0.1.0"
+edition = "2024"
+description = "A small Windows app that unlocks the iPhone/iPad Developer menu and launches games with the Metal Performance HUD."
+publish = false
+
+[dependencies]
+# The window and buttons (egui is an "immediate mode" GUI library: the screen is redrawn every frame).
+eframe = "0.37"
+
+# Talks to iPhones and iPads over USB, the same way a Mac with Xcode would.
+# The version is pinned exactly ("=") because this library still changes a lot between releases.
+idevice = { version = "=0.1.68", features = [
+    "usbmuxd",               # find devices plugged into the PC
+    "pair",                  # ask the device to "Trust This Computer"
+    "amfi",                  # Developer Mode
+    "mobile_image_mounter",  # unlock the Developer menu (mount the Developer Disk Image)
+    "tss",                   # ask Apple to sign the image for this device (iOS 17+)
+    "cryptexd",              # newer way to install the image (iOS 27+)
+    "installation_proxy",    # list installed apps
+    "core_device_proxy",     # secure tunnel used by iOS 17.4+
+    "tunnel_tcp_stack",      # ...that runs inside this app, so no admin rights are needed
+    "rsd",
+    "xpc",
+    "core_device",           # launch apps on iOS 17.4+
+    "dvt",                   # launch apps on older iOS
+] }
+
+# Runs the slow device work in the background so the window never freezes.
+tokio = { version = "1", features = ["rt", "time", "fs"] }
+
+# Downloads the Developer Disk Image files.
+reqwest = { version = "0.13", default-features = false, features = ["rustls", "http2", "system-proxy"] }
+rustls = { version = "0.23", default-features = false, features = ["aws-lc-rs"] }
+
+plist = "1.8"            # Apple's settings-file format
+uuid = { version = "1", features = ["v4"] }
+dirs = "6"               # finds the AppData folder to cache downloads in
+anyhow = "1"             # simple error handling
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+strip = true

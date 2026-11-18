@@ -1,0 +1,75 @@
+# Builds the Windows app on GitHub's servers.
+#
+# - Every push to main (and every pull request): runs the tests and builds the .exe.
+#   The result can be downloaded from that run's page in the Actions tab, under "Artifacts".
+# - To publish a release: Actions tab → "Build" → "Run workflow" → type a version like 0.2.0.
+#   (Pushing a tag such as v0.2.0 does the same.) The zip then appears on the Releases page.
+
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release, e.g. 0.2.0 (leave empty to only build)"
+        required: false
+        type: string
+
+permissions:
+  contents: write # needed to create releases
+
+jobs:
+  build:
+    # We build the Windows app on Linux ("cross-compiling"). It's fast and needs no Windows-only tools.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Rust and the Windows toolchain
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustup target add x86_64-pc-windows-gnu
+          sudo apt-get update
+          sudo apt-get install -y mingw-w64
+
+      - uses: Swatinem/rust-cache@v2 # makes later builds much faster
+
+      - name: Run tests
+        run: cargo test
+
+      - name: Build the Windows app
+        run: cargo build --release --target x86_64-pc-windows-gnu
+
+      - name: Package
+        run: |
+          mkdir -p dist
+          cp target/x86_64-pc-windows-gnu/release/ios-hud-helper.exe README.md dist/
+          (cd dist && zip -9 ../ios-hud-helper-windows.zip ios-hud-helper.exe README.md)
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ios-hud-helper-windows
+          path: dist/
+
+      - name: Publish a release
+        if: startsWith(github.ref, 'refs/tags/v') || inputs.version != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ -n "$INPUT_VERSION" ]; then
+            tag="v${INPUT_VERSION#v}"
+          else
+            tag="$GITHUB_REF_NAME"
+          fi
+          # If this version was released before, replace it.
+          gh release delete "$tag" --yes --cleanup-tag || true
+          gh release create "$tag" ios-hud-helper-windows.zip \
+            --target "$GITHUB_SHA" \
+            --title "iOS HUD Helper $tag" \
+            --notes "Download **ios-hud-helper-windows.zip**, unzip it and run \`ios-hud-helper.exe\`. You need iTunes or the Apple Devices app installed. See the README for the steps."
